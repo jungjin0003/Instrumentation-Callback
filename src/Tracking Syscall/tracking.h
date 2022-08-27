@@ -1,0 +1,21 @@
+#pragma once
+
+#ifndef _TRACKING_
+#define _TRACKING_
+
+#include <windows.h>
+
+typedef struct _PROCESS_INSTRUMENTATION_CALLBACK_INFORMATION
+{
+    ULONG Version;
+    ULONG Reserved;
+    PVOID Callback;
+} PROCESS_INSTRUMENTATION_CALLBACK_INFORMATION, *PPROCESS_INSTRUMENTATION_CALLBACK_INFORMATION;
+
+typedef VOID (__stdcall *PINSTRUMENTATION_CALLBACK_ROUTINE)(ULONG SystemCallNumber, PVOID lpNtFunction, PVOID lpSysretAddr);
+typedef PINSTRUMENTATION_CALLBACK_ROUTINE LPINSTRUMENTATION_CALLBACK_ROUTINE;
+
+VOID RegisterInstrumentationCallbackEx(HANDLE hProcess, LPINSTRUMENTATION_CALLBACK_ROUTINE lpInstrumentationCallback);
+VOID RegisterInstrumentationcallback(LPINSTRUMENTATION_CALLBACK_ROUTINE lpInstrumentationCallback);
+
+#endif
