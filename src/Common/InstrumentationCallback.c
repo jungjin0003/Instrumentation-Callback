@@ -22,9 +22,9 @@ VOID CALLBACK InstrumentationCallbackThunk()
         Win32uBase = GetModuleHandleA("win32u.dll");
     
     DWORD NtdllSize = ((IMAGE_NT_HEADERS64 *)((ULONG_PTR)NtdllBase + ((IMAGE_DOS_HEADER *)NtdllBase)->e_lfanew))->OptionalHeader.SizeOfImage;
-    DWORD Win32uSize = ((IMAGE_NT_HEADERS64 *)((ULONG_PTR)Win32uBase + ((IMAGE_DOS_HEADER *)Win32uBase)->e_lfanew))->OptionalHeader.SizeOfImage;
+    DWORD Win32uSize = Win32uBase == NULL ? 0 : ((IMAGE_NT_HEADERS64 *)((ULONG_PTR)Win32uBase + ((IMAGE_DOS_HEADER *)Win32uBase)->e_lfanew))->OptionalHeader.SizeOfImage;
 
-    if ((NtdllBase <= SysretAddr && SysretAddr <= NtdllSize) || (Win32uBase <= SysretAddr && SysretAddr <= Win32uSize))
+    if ((NtdllBase <= SysretAddr && SysretAddr <= (ULONG_PTR)NtdllBase + NtdllSize) || (Win32uBase <= SysretAddr && SysretAddr <= (ULONG_PTR)Win32uBase + Win32uSize))
     {
         SystemCallNumber = *(ULONG *)((ULONG_PTR)SysretAddr - 0x10);
         NtFunction = (ULONG_PTR)SysretAddr - 0x14;
