@@ -18,6 +18,6 @@ typedef VOID (__stdcall *PINSTRUMENTATION_CALLBACK_ROUTINE)(ULONG SystemCallNumb
 typedef PINSTRUMENTATION_CALLBACK_ROUTINE LPINSTRUMENTATION_CALLBACK_ROUTINE;
 
 BOOL RegisterInstrumentationCallbackEx(HANDLE hProcess, LPINSTRUMENTATION_CALLBACK_ROUTINE lpInstrumentationCallback);
-BOOL RegisterInstrumentationcallback(LPINSTRUMENTATION_CALLBACK_ROUTINE lpInstrumentationCallback);
+BOOL RegisterInstrumentationCallback(LPINSTRUMENTATION_CALLBACK_ROUTINE lpInstrumentationCallback);
 
 #endif
