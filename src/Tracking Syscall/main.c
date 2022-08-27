@@ -1,7 +1,12 @@
 #include <stdio.h>
 #include <windows.h>
 #include <winternl.h>
-#include "tracking.h"
+#include "Common\InstrumentationCallback.h"
+
+VOID CALLBACK InstrumentationCallback(ULONG SystemCallNumber, PVOID lpNtFunction, PVOID lpSysret)
+{
+    
+}
 
 int main(int argc, char *argv[])
 {

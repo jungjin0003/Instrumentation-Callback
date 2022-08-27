@@ -1,9 +1,11 @@
 #pragma once
 
-#ifndef _TRACKING_
-#define _TRACKING_
+#ifndef _INSTRUMENTATIONCALLBACK_
+#define _INSTRUMENTATIONCALLBACK_
 
 #include <windows.h>
+#include <winternl.h>
+#include <ntstatus.h>
 
 typedef struct _PROCESS_INSTRUMENTATION_CALLBACK_INFORMATION
 {
@@ -15,7 +17,7 @@ typedef struct _PROCESS_INSTRUMENTATION_CALLBACK_INFORMATION
 typedef VOID (__stdcall *PINSTRUMENTATION_CALLBACK_ROUTINE)(ULONG SystemCallNumber, PVOID lpNtFunction, PVOID lpSysretAddr);
 typedef PINSTRUMENTATION_CALLBACK_ROUTINE LPINSTRUMENTATION_CALLBACK_ROUTINE;
 
-VOID RegisterInstrumentationCallbackEx(HANDLE hProcess, LPINSTRUMENTATION_CALLBACK_ROUTINE lpInstrumentationCallback);
-VOID RegisterInstrumentationcallback(LPINSTRUMENTATION_CALLBACK_ROUTINE lpInstrumentationCallback);
+BOOL RegisterInstrumentationCallbackEx(HANDLE hProcess, LPINSTRUMENTATION_CALLBACK_ROUTINE lpInstrumentationCallback);
+BOOL RegisterInstrumentationcallback(LPINSTRUMENTATION_CALLBACK_ROUTINE lpInstrumentationCallback);
 
 #endif
