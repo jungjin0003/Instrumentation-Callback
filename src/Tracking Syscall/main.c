@@ -1,15 +1,13 @@
 #include <stdio.h>
 #include <windows.h>
-#include <winternl.h>
-#include "Common\InstrumentationCallback.h"
-
-VOID CALLBACK InstrumentationCallback(ULONG SystemCallNumber, PVOID lpNtFunction, PVOID lpSysret)
-{
-    
-}
+#include "..\Common\InstrumentationCallback.h"
+#include "tracking.h"
 
 int main(int argc, char *argv[])
 {
-    printf("Hello World\n");
+    RegisterInstrumentationCallback(InstrumentationCallback);
+
+    OpenProcess(PROCESS_ALL_ACCESS, FALSE, GetCurrentProcessId());
+
     return 0;
 }
