@@ -1,7 +1,7 @@
 CC=cl.exe
 LINK=link.exe
 MASM=ml64.exe
-CFLAGS=/c /D_NO_CRT_STDIO_INLINE /D_CRT_SECURE_NO_WARNINGS /Od /Z7
+CFLAGS=/c /D_NO_CRT_STDIO_INLINE /D_CRT_SECURE_NO_WARNINGS /Od /Z7 /w
 ASMFLAGS=/c
 LDFLAGS=/NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:msvcprt.lib /MANIFEST:NO /DEBUG:FULL /OPT:REF /OPT:ICF /OPT:LBR /OUT:main.exe
 LDLIBS=ntdll.lib ..\lib\msvcrt.lib
@@ -15,12 +15,15 @@ clean:
 main.obj:
 	$(CC) $(CFLAGS) main.c
 
+tracking.obj:
+	$(CC) $(CFLAGS) tracking.c
+
 InstrumentationCallback.obj:
 	$(CC) $(CFLAGS) ..\Common\InstrumentationCallback.c
 
 InstrumentationCallbackAsm.obj:
 	$(MASM) $(ASMFLAGS) /Fo InstrumentationCallbackAsm.obj ..\Common\InstrumentationCallback.asm
 
-main.exe: main.obj InstrumentationCallback.obj InstrumentationCallbackAsm.obj
-	$(LINK) $(LDFLAGS) main.obj InstrumentationCallback.obj InstrumentationCallbackAsm.obj $(LDLIBS)
+main.exe: main.obj tracking.obj InstrumentationCallback.obj InstrumentationCallbackAsm.obj
+	$(LINK) $(LDFLAGS) main.obj tracking.obj InstrumentationCallback.obj InstrumentationCallbackAsm.obj $(LDLIBS)
 	del *.obj
