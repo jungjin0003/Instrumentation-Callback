@@ -2,19 +2,52 @@
 
 LPINSTRUMENTATION_CALLBACK_ROUTINE CallbackRoutine;
 
-VOID CALLBACK InstrumentationCallbackThunk()
+#ifdef _MSC_VER
+#define ProcessInstrumentationCallback ((PROCESS_INFORMATION_CLASS)40)
+
+extern VOID CALLBACK InstrumentationCallbackThunkStart();
+
+NTSYSAPI NTSTATUS NTAPI NtSetInformationProcess(HANDLE ProcessHandle, PROCESS_INFORMATION_CLASS ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength);
+#endif
+
+#ifdef __GNUC__
+VOID InstrumentationCallbackThunkEnd();
+
+__declspec(naked) VOID CALLBACK InstrumentationCallbackThunkStart()
+{
+    __asm__ __volatile__ (
+        "mov qword ptr gs:[0x2E0], rsp\n\t"
+        "mov qword ptr gs:[0x2D8], r10\n\t"
+        "sub rsp, 0x4D0\n\t"
+        "and rsp, 0xFFFFFFFFFFFFFFF6\n\t"
+        "mov rcx, rsp\n\t"
+        "call %[RtlCaptureContext]\n\t"
+        "sub rsp, 0x20\n\t"
+        "call %[InstrumentationCallbackThunkEnd]\n\t"
+        :
+        : [InstrumentationCallbackThunkEnd] "X" (InstrumentationCallbackThunkEnd), [RtlCaptureContext] "X" (RtlCaptureContext)
+    );
+}
+#endif
+
+VOID InstrumentationCallbackThunkEnd(CONTEXT *context)
 {
     static PVOID NtdllBase = NULL;
     static PVOID Win32uBase = NULL;
+
+    context->Rip = __readgsqword(0x2D8);
+    context->Rsp = __readgsqword(0x2E0);
+
+    if (__readgsbyte(0x02EC))
+        goto THUNK_END_DONE;
+
+    __writegsbyte(0x02EC, 0x01);
 
     ULONG SystemCallNumber = 0xFFFFFFFF;
     PVOID NtFunction = NULL;
     PVOID SysretAddr;
 
-    CONTEXT context = { 0, };
-    RtlCaptureContext(&context);
-
-    SysretAddr = context.Rip = context.R10;
+    SysretAddr = context->Rip;
 
     if (NtdllBase == NULL)
         NtdllBase = GetModuleHandleA("ntdll.dll");
@@ -31,8 +64,9 @@ VOID CALLBACK InstrumentationCallbackThunk()
     }
 
     CallbackRoutine(SystemCallNumber, NtFunction, SysretAddr);
-
-    RtlRestoreContext(&context, NULL);
+    __writegsbyte(0x02EC, 0x00);
+THUNK_END_DONE:
+    RtlRestoreContext(context, NULL);
 }
 
 BOOL RegisterInstrumentationCallbackEx(HANDLE hProcess, LPINSTRUMENTATION_CALLBACK_ROUTINE lpInstrumentationCallback)
@@ -40,7 +74,7 @@ BOOL RegisterInstrumentationCallbackEx(HANDLE hProcess, LPINSTRUMENTATION_CALLBA
     PROCESS_INSTRUMENTATION_CALLBACK_INFORMATION nirvana;
     nirvana.Version = 0;
     nirvana.Reserved = 0;
-    nirvana.Callback = InstrumentationCallbackThunk;
+    nirvana.Callback = InstrumentationCallbackThunkStart;
 
     CallbackRoutine = lpInstrumentationCallback;
 

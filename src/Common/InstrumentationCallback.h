@@ -3,6 +3,8 @@
 #ifndef _INSTRUMENTATIONCALLBACK_
 #define _INSTRUMENTATIONCALLBACK_
 
+#define UMDF_USING_NTSTATUS
+
 #include <windows.h>
 #include <winternl.h>
 #include <ntstatus.h>
