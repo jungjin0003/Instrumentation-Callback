@@ -1,0 +1,22 @@
+CC=gcc.exe
+LINK=$(CC)
+CFLAGS=-c -masm=intel
+LDLIBS=-lntdll
+
+all: main.exe
+
+clean:
+	del main.exe
+
+main.o:
+	$(CC) $(CFLAGS) main.c -o main.o
+
+detect.o:
+	$(CC) $(CFLAGS) detect.c -o tracking.o
+
+InstrumentationCallback.o:
+	$(CC) $(CFLAGS) ..\Common\InstrumentationCallback.c -o InstrumentationCallback.o
+
+main.exe: main.o detect.o InstrumentationCallback.o
+	$(LINK) main.o tracking.o InstrumentationCallback.o -o main.exe $(LDLIBS)
+	del *.o
